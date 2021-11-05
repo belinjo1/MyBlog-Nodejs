@@ -1,8 +1,8 @@
 const express = require('express');
 const morgan = require('morgan'); // middleware used for logging.
 const mongoose = require('mongoose');
-const Blog = require('./models/blog');
 const app=express();
+const blogRoutes = require('../Routes/blogRoutes')
 
 
 //connect to mongodb
@@ -15,7 +15,7 @@ mongoose.connect(dbURI)
 
 // listen for requests
 app.set('view engine','ejs');
-app.set('views', 'C:/Users/Bleer/Viti3/nodeJs/NodeJsFirstApp/views');
+app.set('views', 'C:/Users/Bleer/Documents/GitHub/Blog/views');
 
 
 //MiddleWare & static files
@@ -79,66 +79,19 @@ app.use(morgan('dev')); //logging
 
 ///-------------------------------------------------------
 
+
 app.get('/',(req,res)=>{
    res.redirect('/blogs');
 })
+
 
 app.get('/about',(req,res)=>{
     res.render('about',{title:'About'});
 })
 
-//blog routes
 
-app.get('/blogs',(req,res)=>{
-    Blog.find().sort({createdAt:-1})
-    .then((result)=>{
-     res.render('index',{title:'All Blogs',blogs:result})
-    })
-    .catch((err)=>{
-        console.log(err);
-    })
-})
+app.use('/blogs',blogRoutes);
 
-//Post method to insert data to database
-app.post('/blogs',(req,res)=>{
-const blog = new Blog(req.body);
-blog.save()
-.then((result)=>{
-    res.redirect('/blogs');
-})
-.catch((err)=>{
-    console.log(err);
-})
-})
-
-app.get('/blogs/:id',(req,res)=>{
-    const id = req.params.id;
-    Blog.findById(id)
-    .then((result)=>{
-        res.render('details',{blog:result,title:'Blog Details'})
-    })
-    .catch((err)=>{
-        console.log(err);
-    })
-})
-
-app.delete('/blogs/:id',(req,res)=>{
-    const id=req.params.id;
-    Blog.findByIdAndDelete(id)
-    .then((result)=>{
-        res.json({redirect:'/blogs'})
-    })
-    .catch((err)=>{console.log(err);})
-})
-
-
-app.get('/blog',(req,res)=>{
-    res.render('blog',{title:'Blog'});
-})
-
-app.get('/createblog',(req,res)=>{
-    res.render('create',{title:'Create Blog'});
-})
 
 //404 page//
 app.use((req,res)=>{
